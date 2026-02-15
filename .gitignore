@@ -1,0 +1,23 @@
+# --- DEPENDENCIAS ---
+# Ignora la carpeta node_modules porque es muy pesada y se genera con 'npm install'
+node_modules/
+
+# --- SEGURIDAD Y CONFIGURACIÓN ---
+# Ignora el archivo de variables de entorno (Aquí están tus claves de DB y JWT)
+# Este es un requisito de seguridad indispensable.
+.env
+
+# --- ARCHIVOS DE REGISTRO (LOGS) ---
+# Ignora archivos de errores y logs de npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- ARCHIVOS DEL SISTEMA ---
+# Archivos temporales de Windows o Mac que no aportan al código
+.DS_Store
+Thumbs.db
+
+# --- CONFIGURACIÓN DE VS CODE ---
+# Opcional: ignora la configuración personal de tu editor
+.vscode/
