@@ -1,17 +1,15 @@
-const express = require('express');
+import express from "express";
+import { register, login } from "../controllers/authController.js";
+import { verificarToken } from "../middlewares/authMiddleware.js";
+
 const router = express.Router();
-const authController = require('../controllers/authController');
-const verifyToken = require('../middlewares/authMiddleware');
 
-router.post('/register', authController.register);
-router.post('/login', authController.login);
+router.post("/register", register);
+router.post("/login", login);
 
-router.get('/profile', verifyToken, (req, res) => {
-    res.json({ 
-        ok: true, 
-        message: "Bienvenido al área segura",
-        userId: req.user.id 
-    });
+// Ruta protegida (Requisito C de la guía)
+router.get("/profile", verificarToken, (req, res) => {
+  res.json({ ok: true, message: "Acceso concedido al perfil", user: req.user });
 });
 
-module.exports = router;
+export default router;

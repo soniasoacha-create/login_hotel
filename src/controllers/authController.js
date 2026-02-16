@@ -1,37 +1,41 @@
-const User = require('../models/User');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { User } from '../models/User.js';
 
-exports.register = async (req, res) => {
+export const login = async (req, res) => {
     try {
-        const { nombres, apellidos, email, password, tipo_usuario } = req.body;
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const { email, password } = req.body;
+        const usuario = await User.findOne({ where: { email } });
 
-        await User.create({
-            nombres, apellidos, email,
-            password: hashedPassword,
-            tipo_usuario
-        });
+        if (!usuario) return res.status(404).json({ message: "Usuario no encontrado" });
 
-        res.status(201).json({ ok: true, message: "Usuario creado" });
+        // Compara contra la columna password_hash mapeada
+        const validPassword = bcrypt.compareSync(password, usuario.password);
+        if (!validPassword) return res.status(401).json({ message: "Contraseña incorrecta" });
+
+        const token = jwt.sign(
+            { id: usuario.id, rol: usuario.rol },
+            process.env.JWT_SECRET,
+            { expiresIn: '8h' }
+        );
+
+        res.json({ ok: true, token, user: { nombres: usuario.nombres, rol: usuario.rol } });
     } catch (error) {
-        res.status(500).json({ ok: false, message: "Error interno" });
+        res.status(500).json({ message: "Error interno", error: error.message });
     }
 };
 
-exports.login = async (req, res) => {
+export const register = async (req, res) => {
     try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ where: { email } });
+        const { nombres, apellidos, email, password, telefono, rol } = req.body;
+        const passwordHash = bcrypt.hashSync(password, 10);
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
-            return res.status(401).json({ message: "Credenciales inválidas" });
-        }
+        const nuevoUsuario = await User.create({
+            nombres, apellidos, email, password: passwordHash, telefono, rol
+        });
 
-        const token = jwt.sign({ id: user.id_usuario }, process.env.JWT_SECRET, { expiresIn: '2h' });
-        res.json({ ok: true, token });
+        res.status(201).json({ message: "Usuario creado", id: nuevoUsuario.id });
     } catch (error) {
-        res.status(500).json({ message: "Error en el servidor" });
+        res.status(500).json({ message: "Error al registrar", error: error.message });
     }
 };

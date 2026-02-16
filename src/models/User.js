@@ -1,30 +1,27 @@
-const { DataTypes } = require('sequelize');
-const db = require('../config/db');
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/database.js";
 
-const User = db.define('User', {
-    id_usuario: { 
-        type: DataTypes.INTEGER, 
-        primaryKey: true, 
-        autoIncrement: true 
+export const User = sequelize.define("User", {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        field: 'id_usuarios' // Mapeo para corregir ER_WRONG_AUTO_KEY
     },
-    nombres: { type: DataTypes.STRING, allowNull: false },
-    apellidos: { type: DataTypes.STRING, allowNull: false },
-    email: { 
-        type: DataTypes.STRING, 
-        allowNull: false, 
-        unique: true // Requisito: email único [cite: 54]
-    },
+    nombres: { type: DataTypes.STRING(50), allowNull: false },
+    apellidos: { type: DataTypes.STRING(50), allowNull: false },
+    email: { type: DataTypes.STRING(100), allowNull: false, unique: true },
     password: { 
-        type: DataTypes.STRING, 
-        allowNull: false // Aquí guardaremos el hash de bcrypt [cite: 24, 55]
+        type: DataTypes.STRING(255), 
+        allowNull: false,
+        field: 'password_hash' // Mapeo exacto a tu DB
     },
-    tipo_usuario: { 
-        type: DataTypes.ENUM('admin', 'moderador', 'cliente'), 
-        defaultValue: 'cliente' 
+    telefono: { type: DataTypes.STRING(30) },
+    rol: { 
+        type: DataTypes.ENUM('administrador', 'moderador', 'cliente'),
+        field: 'tipo_usuario' // Mapeo exacto a tu DB
     }
 }, {
-    tableName: 'usuarios', // Nombre exacto de tu tabla en MySQL
-    timestamps: false     // Desactivado porque usas 'fecha_registro' manual
+    tableName: "usuarios", // Usa la tabla con tus 5 registros
+    timestamps: false      // Desactiva createdAt/updatedAt para evitar errores
 });
-
-module.exports = User;
